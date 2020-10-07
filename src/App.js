@@ -1,26 +1,109 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React,{Component} from 'react';
+import  Title from './components/Title';
+import Form from "./components/Form";
+import Weather from "./components/Weather";
+import './static/css/main.css';
+const API_KEY='a6307de3a3fd31e8f075b844dea4b2ce';
 
-function App() {
+class App  extends Component{
+  state = {
+    temperature: undefined,
+    feelsLike: undefined,
+    city: undefined,
+    country: undefined,
+    humidity: undefined,
+    pressure: undefined,
+    description: undefined,
+    windSpeed: undefined,
+    windDegree: undefined,
+    visibility: undefined,
+    error: undefined
+}
+  getWeather = async(e) =>{
+    e.preventDefault()
+    const city = e.target.elements.city.value
+    const country = e.target.elements.country.value
+    const api_call = await fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${API_KEY}&units=metric`)
+    const data = await api_call.json()
+    if(city && country) {
+      this.setState({
+          temperature: data.main.temp,
+          feelsLike: data.main.feels_like,
+          city: data.name,
+          country: data.sys.country,
+          humidity: data.main.humidity,
+          pressure: data.main.pressure,
+          description: data.weather[0].description,
+          windSpeed: data.wind.speed,
+          windDegree: data.wind.deg,
+          visibility: data.visibility,
+          error: ""
+      })
+      console.log(this.state)
+  } else {
+      this.setState({
+          temperature: undefined,
+          feelsLike: undefined,
+          city: undefined,
+          country: undefined,
+          humidity: undefined,
+          pressure: undefined,
+          description: undefined,
+          windSpeed: undefined,
+          windDegree: undefined,
+          visibility: undefined,
+          error: "Please enter values"
+        });
+  }
+}
+getClassName=()=>{
+  var weather=this.state.description;
+        if(weather === undefined){
+          weather = 'default-weather'
+      } else if (weather==='clear sky'){
+          weather = 'clear-sky'
+      } else if (weather==='overcast clouds' || weather==='scattered clouds'){
+          weather = 'broken-clouds'
+      }
+      else if (weather==='haze'){
+          weather = 'haze'
+      }
+      else if(weather==='heavy intensity rain'){
+          weather='cloudy'
+      }
+      else{
+          weather= 'default-weather'
+      }
+      return weather;
+}
+  
+  render(){
+    const weatherClass=this.getClassName()
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    
+    <div className="container">
+      <div className={weatherClass}>
+        <Title/>
+      </div>
+      <div className="weathercard">
+        <Form  getWeather={this.getWeather} />
+        <Weather
+        temperature={this.state.temperature}
+        feelsLike={this.state.feelsLike}
+        city={this.state.city}
+        country={this.state.country}
+        humidity={this.state.humidity}
+        pressure={this.state.pressure}
+        description={this.state.description}
+        windSpeed={this.state.windSpeed}
+        windDegree={this.state.windDegree}
+        visibility={this.state.visibility}
+        error={this.state.error}
+        />
+      </div>
     </div>
+   
   );
 }
-
+}
 export default App;
